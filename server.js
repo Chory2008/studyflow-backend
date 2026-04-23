@@ -3,7 +3,7 @@ const cors    = require("cors");
 const fetch   = (...args) => import("node-fetch").then(({ default: f }) => f(...args));
 
 const app  = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
@@ -47,5 +47,5 @@ app.get("/health", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
+ console.log(`Servidor corriendo en puerto ${PORT}`);
 });
