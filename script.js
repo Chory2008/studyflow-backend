@@ -499,7 +499,7 @@ async function sendMessage() {
   chatHistory.push({ role:"user", content:msg });
 
   try {
-    const res = await fetch("http://localhost:3000/api/chat", {
+    const res = await fetch("https://studyflow-backend-production-55d9.up.railway.app/api/chat", {
       method: "POST",
       headers: { "Content-Type":"application/json" },
       body: JSON.stringify({ messages: chatHistory })
