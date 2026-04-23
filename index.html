@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StudyFlow AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+  <!-- PARTICLE CANVAS -->
+  <canvas id="particles"></canvas>
+
+  <!-- ========== SCREEN: LOGIN ========== -->
+  <div id="screen-login" class="screen active">
+    <div class="login-container">
+      <div class="login-glow-ring"></div>
+      <div class="login-card">
+        <div class="logo-area">
+          <div class="logo-icon">
+            <i class="fas fa-brain"></i>
+          </div>
+          <h1 class="logo-text">StudyFlow <span>AI</span></h1>
+          <p class="logo-sub">Tu asistente de estudio inteligente</p>
+        </div>
+
+        <div class="tab-switcher">
+          <button class="tab-btn active" data-tab="login">Iniciar Sesión</button>
+          <button class="tab-btn" data-tab="register">Registrarse</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="form-panel" id="panel-login">
+          <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="login-email" placeholder="Correo electrónico" autocomplete="off"/>
+          </div>
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="login-password" placeholder="Contraseña"/>
+            <span class="toggle-pass" onclick="togglePass('login-password')"><i class="fas fa-eye"></i></span>
+          </div>
+          <button class="btn-neon" id="btn-login" onclick="loginUser()">
+            <span>Entrar</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <div class="divider"><span>o continúa con</span></div>
+          <button class="btn-google" onclick="loginGoogle()">
+            <i class="fab fa-google"></i> Google
+          </button>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div class="form-panel hidden" id="panel-register">
+          <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" id="reg-name" placeholder="Nombre completo" autocomplete="off"/>
+          </div>
+          <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="reg-email" placeholder="Correo electrónico" autocomplete="off"/>
+          </div>
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="reg-password" placeholder="Contraseña (mín. 6 caracteres)"/>
+          </div>
+          <button class="btn-neon" id="btn-register" onclick="registerUser()">
+            <span>Crear Cuenta</span>
+            <i class="fas fa-user-plus"></i>
+          </button>
+        </div>
+
+        <div id="auth-msg" class="auth-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MAIN APP (post-login) ========== -->
+  <div id="screen-app" class="screen hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <i class="fas fa-brain"></i>
+        <span>StudyFlow</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="dashboard">
+          <i class="fas fa-house"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="tasks">
+          <i class="fas fa-list-check"></i>
+          <span>Tareas</span>
+        </button>
+        <button class="nav-item" data-view="ai">
+          <i class="fas fa-robot"></i>
+          <span>IA Chat</span>
+          <span class="badge">NEW</span>
+        </button>
+        <button class="nav-item" data-view="stats">
+          <i class="fas fa-chart-bar"></i>
+          <span>Estadísticas</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="user-chip" id="user-chip">
+          <div class="user-avatar" id="user-avatar">?</div>
+          <div class="user-info">
+            <span class="user-name" id="user-display-name">Usuario</span>
+            <span class="user-role">Estudiante</span>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="logoutUser()">
+          <i class="fas fa-right-from-bracket"></i>
+          <span>Cerrar Sesión</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- HAMBURGER (mobile) -->
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content" id="main-content">
+
+      <!-- ---- VIEW: DASHBOARD ---- -->
+      <div class="view active" id="view-dashboard">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Dashboard <span class="pulse-dot"></span></h2>
+            <p class="view-sub" id="greeting-text">Bienvenido de vuelta</p>
+          </div>
+          <div class="header-clock" id="live-clock">--:--:--</div>
+        </div>
+
+        <!-- STAT CARDS -->
+        <div class="stats-grid">
+          <div class="stat-card" style="--accent:#00f5ff">
+            <div class="stat-icon"><i class="fas fa-list-check"></i></div>
+            <div class="stat-info">
+              <span class="stat-number" id="stat-total">0</span>
+              <span class="stat-label">Tareas Total</span>
+            </div>
+            <div class="stat-glow"></div>
+          </div>
+          <div class="stat-card" style="--accent:#39ff14">
+            <div class="stat-icon"><i class="fas fa-circle-check"></i></div>
+            <div class="stat-info">
+              <span class="stat-number" id="stat-done">0</span>
+              <span class="stat-label">Completadas</span>
+            </div>
+            <div class="stat-glow"></div>
+          </div>
+          <div class="stat-card" style="--accent:#ff6b35">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+              <span class="stat-number" id="stat-pending">0</span>
+              <span class="stat-label">Pendientes</span>
+            </div>
+            <div class="stat-glow"></div>
+          </div>
+          <div class="stat-card" style="--accent:#bf5fff">
+            <div class="stat-icon"><i class="fas fa-fire"></i></div>
+            <div class="stat-info">
+              <span class="stat-number" id="stat-streak">0</span>
+              <span class="stat-label">Racha días</span>
+            </div>
+            <div class="stat-glow"></div>
+          </div>
+        </div>
+
+        <!-- PROGRESS BAR -->
+        <div class="progress-section">
+          <div class="progress-header">
+            <span>Progreso General</span>
+            <span id="progress-pct">0%</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-bar"></div>
+          </div>
+        </div>
+
+        <!-- RECENT TASKS -->
+        <div class="section-card">
+          <div class="section-header">
+            <h3><i class="fas fa-bolt"></i> Tareas Recientes</h3>
+            <button class="btn-small" onclick="switchView('tasks')">Ver todas</button>
+          </div>
+          <div id="recent-tasks-list" class="recent-list">
+            <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <p>Sin tareas aún. ¡Crea una!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MOTIVATIONAL QUOTE -->
+        <div class="quote-card">
+          <i class="fas fa-quote-left quote-icon"></i>
+          <p id="quote-text">Cargando frase inspiracional...</p>
+          <button class="btn-refresh-quote" onclick="newQuote()"><i class="fas fa-rotate"></i></button>
+        </div>
+      </div>
+
+      <!-- ---- VIEW: TASKS ---- -->
+      <div class="view hidden" id="view-tasks">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Mis Tareas</h2>
+            <p class="view-sub">Organiza y gestiona tus actividades</p>
+          </div>
+          <button class="btn-neon-sm" onclick="openTaskModal()">
+            <i class="fas fa-plus"></i> Nueva Tarea
+          </button>
+        </div>
+
+        <!-- FILTER TABS -->
+        <div class="filter-tabs">
+          <button class="filter-btn active" data-filter="all">Todas</button>
+          <button class="filter-btn" data-filter="pending">Pendientes</button>
+          <button class="filter-btn" data-filter="done">Completadas</button>
+          <button class="filter-btn" data-filter="high">Alta Prioridad</button>
+        </div>
+
+        <!-- TASK LIST -->
+        <div id="tasks-container" class="tasks-grid">
+          <div class="empty-state full">
+            <i class="fas fa-clipboard-list"></i>
+            <p>No hay tareas. ¡Empieza agregando una!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---- VIEW: AI CHAT ---- -->
+      <div class="view hidden" id="view-ai">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">IA Asistente <span class="ai-badge">GPT</span></h2>
+            <p class="view-sub">Pregúntame cualquier cosa sobre tus estudios</p>
+          </div>
+          <button class="btn-small danger" onclick="clearChat()"><i class="fas fa-trash"></i> Limpiar</button>
+        </div>
+
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-messages">
+            <div class="msg ai-msg intro-msg">
+              <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+              <div class="msg-bubble">
+                <p>¡Hola! Soy tu asistente de estudio con IA 🧠. Puedo ayudarte con:</p>
+                <ul>
+                  <li>📚 Explicar temas complejos</li>
+                  <li>✍️ Resumir textos</li>
+                  <li>🧮 Resolver problemas de matemáticas</li>
+                  <li>💡 Generar ideas para proyectos</li>
+                </ul>
+                <p>¿Por dónde empezamos?</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-input-area">
+            <div class="suggested-prompts" id="suggested-prompts">
+              <button class="prompt-chip" onclick="sendPromptChip(this)">Explícame la fotosíntesis</button>
+              <button class="prompt-chip" onclick="sendPromptChip(this)">Crea un plan de estudio</button>
+              <button class="prompt-chip" onclick="sendPromptChip(this)">Ayúdame a entender álgebra</button>
+            </div>
+            <div class="chat-input-row">
+              <textarea id="chat-input" placeholder="Escribe tu pregunta aquí..." rows="1"
+                onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+              <button class="btn-send" id="btn-send" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+            <p class="ai-note">Conectado a Claude AI via servidor local · puerto 3000</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---- VIEW: STATS ---- -->
+      <div class="view hidden" id="view-stats">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Estadísticas</h2>
+            <p class="view-sub">Tu rendimiento de estudio</p>
+          </div>
+        </div>
+
+        <div class="stats-detail-grid">
+          <div class="stats-detail-card">
+            <h3><i class="fas fa-chart-pie"></i> Distribución de Tareas</h3>
+            <div class="donut-chart-wrap">
+              <svg viewBox="0 0 120 120" class="donut-chart" id="donut-svg">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="#1a1a2e" stroke-width="18"/>
+                <circle cx="60" cy="60" r="50" fill="none" stroke="#00f5ff" stroke-width="18"
+                  stroke-dasharray="0 314" stroke-linecap="round"
+                  id="donut-done" transform="rotate(-90 60 60)"/>
+                <circle cx="60" cy="60" r="50" fill="none" stroke="#ff6b35" stroke-width="18"
+                  stroke-dasharray="0 314" stroke-linecap="round"
+                  id="donut-pending" transform="rotate(-90 60 60)"/>
+              </svg>
+              <div class="donut-center">
+                <span id="donut-pct">0%</span>
+                <span>éxito</span>
+              </div>
+            </div>
+            <div class="donut-legend">
+              <span class="legend-item"><span class="dot" style="background:#00f5ff"></span>Completadas</span>
+              <span class="legend-item"><span class="dot" style="background:#ff6b35"></span>Pendientes</span>
+            </div>
+          </div>
+
+          <div class="stats-detail-card">
+            <h3><i class="fas fa-calendar-check"></i> Actividad Semanal</h3>
+            <div class="bar-chart" id="week-chart">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <div class="stats-detail-card wide">
+            <h3><i class="fas fa-trophy"></i> Logros</h3>
+            <div class="achievements-grid" id="achievements-grid">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========== TASK MODAL ========== -->
+  <div id="task-modal" class="modal-overlay hidden" onclick="closeModalOut(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-title"><i class="fas fa-plus-circle"></i> Nueva Tarea</h3>
+        <button class="modal-close" onclick="closeTaskModal()"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-task-id"/>
+        <div class="input-group">
+          <i class="fas fa-heading"></i>
+          <input type="text" id="task-title" placeholder="Título de la tarea" autocomplete="off"/>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-align-left"></i>
+          <textarea id="task-desc" placeholder="Descripción (opcional)" rows="3"></textarea>
+        </div>
+        <div class="modal-row">
+          <div class="input-group half">
+            <i class="fas fa-tag"></i>
+            <select id="task-priority">
+              <option value="low">🟢 Baja</option>
+              <option value="medium" selected>🟡 Media</option>
+              <option value="high">🔴 Alta</option>
+            </select>
+          </div>
+          <div class="input-group half">
+            <i class="fas fa-calendar"></i>
+            <input type="date" id="task-due"/>
+          </div>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-book"></i>
+          <input type="text" id="task-subject" placeholder="Materia / Asignatura"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" onclick="closeTaskModal()">Cancelar</button>
+        <button class="btn-neon" onclick="saveTask()"><i class="fas fa-save"></i> Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script src="script.js"></script>
+</body>
+</html>
